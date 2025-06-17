@@ -33,8 +33,9 @@ NOTES:
 
 ---
 
-CONTACT:
+CONTACT: [https://github.com/flamingduck313]
 
-Support: [your email or GitHub link]
+Support: . [https://github.com/flamingduck313/BoostMac]
+
 
 © 2025 [flamingduck]. All rights reserved.
