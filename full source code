@@ -1,0 +1,207 @@
+-- === BOOSTMAC ARCADE FINAL ===
+
+-- 🧠 Global Properties
+property viewTermsCount : 0
+
+property ticTacToeScript : "set board to {\" \", \" \", \" \", \" \", \" \", \" \", \" \", \" \", \" \"}
+repeat
+    set displayBoard to \"\"
+    repeat with i from 1 to 9
+        set displayBoard to displayBoard & board's item i
+        if i mod 3 = 0 then
+            set displayBoard to displayBoard & return
+        else
+            set displayBoard to displayBoard & \" | \"
+        end if
+    end repeat
+    set cell to text returned of (display dialog \"Tic-Tac-Toe\\n\" & displayBoard & \"\\nChoose a cell (1–9):\" default answer \"\")
+    try
+        set c to cell as integer
+        if board's item c is \" \" then
+            set board's item c to \"X\"
+        else
+            display dialog \"Cell taken!\" buttons {\"OK\"}
+        end if
+    on error
+        display dialog \"Invalid input.\" buttons {\"OK\"}
+    end try
+end repeat"
+
+property wordScrambleScript : "set answer to \"BOOSTMAC\"
+set jumbled to \"CAMOTOBS\"
+repeat
+    set guess to text returned of (display dialog \"🧠 Word Scramble:\\nUnscramble: \" & jumbled default answer \"\")
+    if guess as uppercase = answer then
+        display dialog \"🎉 Correct!\" buttons {\"OK\"}
+        exit repeat
+    else
+        display dialog \"❌ Nope, try again.\" buttons {\"Retry\"}
+    end if
+end repeat"
+
+property mazeScript : "set room to 1
+repeat
+    if room = 1 then
+        set dir to button returned of (display dialog \"🌫️ You're in a stone corridor.\\nWhich way?\" buttons {\"North\", \"East\"})
+        if dir = \"North\" then
+            set room to 2
+        else if dir = \"East\" then
+            set room to 3
+        end if
+    else if room = 2 then
+        display dialog \"🎉 You escaped the maze!\" buttons {\"Back to BoostMac\"}
+        exit repeat
+    else if room = 3 then
+        set room to 1
+    end if
+end repeat"
+
+-- 🎮 Randomly pick game per launch
+set gameSelector to (random number from 1 to 3)
+
+-- 🖼️ Front Page
+set welcomeText to "Welcome to BoostMac — a quick tool to help your Mac run cleaner and smoother.
+
+Click Continue to begin."
+set forceTip to "              ⌘⌥Esc to Force Quit"
+set fullMessage to welcomeText & "
+
+" & forceTip
+set frontChoice to display dialog fullMessage buttons {"Quit", "Continue"} default button "Continue"
+if button returned of frontChoice is "Quit" then error number -128
+
+-- 🔐 Admin Auth
+do shell script "echo BoostMac auth stage..." with administrator privileges
+
+-- 📜 Terms Loop
+repeat
+	set termsChoice to display dialog "🔹 What BoostMac Does:
+
+• Clears temporary system and user caches
+• Flushes outdated DNS records
+• Restarts Finder and Dock for interface stability
+• Frees up inactive memory to improve responsiveness
+
+BoostMac makes temporary adjustments only. It does **not** delete your files or make permanent changes.
+
+🔸 Accept Terms & Conditions to continue." buttons {"Cancel", "View Full Terms", "I Accept Terms & Proceed"} default button "I Accept Terms & Proceed"
+	
+	if button returned of termsChoice is "Cancel" then
+		error number -128
+		
+	else if button returned of termsChoice is "View Full Terms" then
+		set viewTermsCount to viewTermsCount + 1
+		set termsPanel to display dialog "🔸 Terms & Conditions:
+
+By proceeding, you acknowledge that BoostMac performs system tuning routines that may affect appearance or session behavior. While no data is directly altered, the developer is **not liable** for any loss, malfunction, or instability resulting from its use. You accept full responsibility by continuing." buttons {"Back", "?"} default button "Back"
+		
+		if button returned of termsPanel is "?" then
+			if gameSelector = 1 then
+				run script ticTacToeScript
+			else if gameSelector = 2 then
+				run script wordScrambleScript
+			else
+				run script mazeScript
+			end if
+		end if
+		
+	else if button returned of termsChoice is "I Accept Terms & Proceed" then
+		exit repeat
+	end if
+end repeat
+
+
+-- ⏳ Progress
+-- 🧹 Optimisation + Loading Bar combo
+do shell script "
+(
+    rm -rf ~/Library/Caches/*
+    dscacheutil -flushcache
+    killall -HUP mDNSResponder
+    purge
+) &" with administrator privileges
+
+set progress total steps to 60
+set progress description to "Running BoostMac..."
+set progress additional description to "Optimising system performance..."
+
+repeat with i from 1 to 60
+	delay 0.1
+	set progress completed steps to i
+end repeat
+
+set progress total steps to 0
+delay 0.3
+
+
+-- ✅ Done
+set finalChoice to button returned of (display dialog "✅ Boost complete!
+Your Mac is refreshed and ready to go." buttons {"Finish", "..."} default button "Finish")
+-- === BOOSTMAC HIDDEN DEV PANEL – FIXED AND FUNCTIONAL ===
+
+-- Final BoostMac screen with hidden "..." path
+set finalChoice to button returned of (display dialog "✅ Boost complete!
+Your Mac is refreshed and ready to go." buttons {"Finish", "..."} default button "Finish")
+
+if finalChoice = "..." then
+	-- Warning prompt
+	set proceed to button returned of (display dialog "⚠️ Hidden Protocol Access
+
+You are entering a developer zone and it will most certainly harm your device if you do so.
+
+Continue only if you accept responsibility." buttons {"Abort", "Continue"} default button "Abort")
+	
+	if proceed = "Continue" then
+		-- Reuse BoostMac-style password gate
+		do shell script "echo Dev access granted" with administrator privileges
+		
+		-- Show Dev Panel (3 buttons only)
+		set devPick to button returned of (display dialog "🧪 BoostMac Developer Panel
+
+Choose an experimental module:" buttons {"ShellMatch", "GlitchGuesser", "Exit"} default button "ShellMatch")
+		
+		if devPick = "ShellMatch" then
+			-- Symbol match game (3 options)
+			set symbols to {"🧿", "♣", "♦"}
+			set hiddenSymbol to some item of symbols
+			set guess to button returned of (display dialog "🧠 ShellMatch
+
+One symbol was shuffled into hiding.
+
+Which one is it?" buttons symbols cancel button item 3 of symbols default button item 1 of symbols)
+			
+			if guess = hiddenSymbol then
+				display dialog "🎯 Correct! The hidden symbol was " & hiddenSymbol & "." buttons {"Back"}
+			else
+				display dialog "❌ Wrong! It was " & hiddenSymbol & "." buttons {"Back"}
+			end if
+			
+		else if devPick = "GlitchGuesser" then
+			-- Level 1 (safe 3-button dialog)
+			set glitchChoice to button returned of (display dialog "💻 GlitchGuesser :: Level 1
+
+Choose a valid debug code to override lockout.
+
+✖ 0xE3 MEMORY_REF_FAIL  
+✖ 0xD9 GUI_FRAME_RIP  
+⚠  0xB5 SAFE_MODE_OVERRIDE" buttons {"0xE3", "0xD9", "0xB5"} cancel button "0xD9" default button "0xB5")
+			
+			if glitchChoice = "0xB5" then
+				-- Level 2 token entry
+				set tokenEntry to text returned of (display dialog "🔐 Level 2
+
+Enter TOKEN to finalize override:" default answer "")
+				if (uppercase of tokenEntry) = "SECURE-UNLOCK" then
+					display dialog "✅ Override accepted." buttons {"Back"}
+				else
+					display dialog "❌ Invalid TOKEN." buttons {"Back"}
+				end if
+			else
+				display dialog "❌ Code rejected." buttons {"Back"}
+			end if
+			
+		else
+			display dialog "🔒 Developer Panel closed." buttons {"OK"}
+		end if
+	end if
+end if
